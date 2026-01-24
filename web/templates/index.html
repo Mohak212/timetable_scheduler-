@@ -490,6 +490,12 @@
                     <input id="teacher-subject" placeholder="Subject">
                     <button class="btn" onclick="addTeacher()">Add</button>
                 </div>
+                <input type="file" id="teacher-csv" accept=".csv">
+                <button class="btn" type="button" onclick="loadTeacherCSV()">
+                    📄 Upload Teacher CSV
+                </button>
+                <small>CSV format: Teacher Name</small>
+
                 <div class="items-list" id="teachers-list">
                     <div class="empty-state">No teachers added yet</div>
                 </div>
@@ -648,8 +654,7 @@
             renderCommonClasses();
             renderAllocationRules();
 
-            // Clear result
-            document.getElementById('result').innerHTML = '';
+            
         }
 
         function loadSampleData() {
@@ -1143,7 +1148,10 @@
         }
 
         function renderTimetable(timetable) {
-            let html = '<div class="timetable-container">';
+            const old = document.getElementById(`semester-${currentSemester}`);
+            if (old) old.remove();
+
+            let html = `<div class="timetable-container" id="semester-${currentSemester}">`;
             html += `<h2>✨ Generated Timetable - Semester ${currentSemester}</h2>`;
 
             const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -1265,7 +1273,7 @@
     </div>`;
             html += '</div>';
 
-            document.getElementById("result").innerHTML = html;
+            document.getElementById("result").insertAdjacentHTML("beforeend", html);
             document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -1291,6 +1299,35 @@
         document.getElementById('common-teacher').addEventListener('keypress', e => {
             if (e.key === 'Enter') addCommonClass();
         });
+        function loadTeacherCSV() {
+    const fileInput = document.getElementById('teacher-csv');
+
+    if (!fileInput.files.length) {
+        alert('Please select a CSV file first');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const lines = e.target.result.split('\n');
+
+        // Skip header row
+        lines.slice(1).forEach(line => {
+            const [name, subject] = line.split(',').map(v => v.trim());
+            if (!name || !subject) return;
+
+            teachers.push({ name, subject });
+        });
+
+        renderTeachers();
+        fileInput.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
     </script>
 
 </body>

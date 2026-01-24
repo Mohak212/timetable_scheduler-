@@ -89,11 +89,51 @@ window.addEventListener('load', () => {
   addTeacher();
   addTeacher();
 });
-```
+
+function loadTeacherCSV() {
+  const fileInput = document.getElementById('teacher-csv');
+
+  if (!fileInput.files.length) {
+    alert('Please select a CSV file first');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    const lines = e.target.result.split('\n');
+
+    lines.slice(1).forEach(line => {
+      const [teacher, subject] = line.split(',').map(v => v.trim());
+      if (!teacher || !subject) return;
+
+
+      // reuse existing addTeacher logic manually
+      const container = document.getElementById('teachers');
+      const emptyState = container.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <input type="text" value="${teacher} - ${subject}" required>
+        <button type="button" class="remove-btn"
+          onclick="this.parentElement.remove(); checkEmpty('teachers')">×</button>
+      `;
+      container.appendChild(div);
+    });
+
+    fileInput.value = '';
+  };
+
+  reader.readAsText(file);
+}
 
 **File Structure:**
 ```
 your-folder/
   ├── index.html
   ├── style.css
-  └── app.js
+  └── app.js 
+  '''

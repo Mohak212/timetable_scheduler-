@@ -108,7 +108,19 @@ def generate_random_timetable(classes, subjects, teachers, days, classrooms=None
     if semester_constraints is None:
         semester_constraints = {}
         
-    
+    # ---------------- NORMALIZE SUBJECTS ----------------
+# Subjects may come as a LIST (from frontend semesterData)
+# or as a DICT (expected by scheduler). Normalize once.
+    if isinstance(subjects, list):
+        subjects = {
+            s["name"]: {
+                "count": s["periods"],
+                "type": s.get("type", "THEORY")
+            }
+            for s in subjects
+        }
+# ---------------------------------------------------
+
     # 6 slots per day for 6 teaching periods
     tt = {c: {d: [None] * 6 for d in days} for c in classes}
     
